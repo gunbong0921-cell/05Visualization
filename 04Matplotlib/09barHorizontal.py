@@ -1,4 +1,8 @@
 # 라이브러리 임포트
+from cProfile import label
+from turtle import color
+
+from numpy import size
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -26,32 +30,27 @@ df_seoul = df[mask]
 df_seoul = df_seoul.drop(['전출지별'], axis=1)
 df_seoul.rename({'전입지별':'전입지'}, axis=1, inplace=True)
 df_seoul.set_index('전입지', inplace=True)
-print(df_seoul)
-sr_one = df_seoul.loc['경기도']
+# print(df_seoul)
+# sr_one = df_seoul.loc['경기도']
 # print(sr_one)
 # 데이터 전처리 완료
 
-# 그래프 스타일 지정하기 : ggplot과 같은 스타일은 URL참조
-# https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
-plt.style.use('ggplot')
+# 기존 연도를 1970 -> 2010으로 수정
+col_years = list(map(str, range(2010, 2018)))
+# 각 4개의 도를 선택해서 데이터 추출 / 연도 지정 
+df4 = df_seoul.loc[['충청남도','경상북도', '강원도', '전라남도'], col_years]
 
-# 캔버스 크기 지정
-fig = plt.figure(figsize=(20, 5))
-# 2행 1열중 첫번째 Axe 객체 생성(즉 캔버스를 위/아래 방향으로 분할)
-axe1 = fig.add_subplot(2, 1, 1)
-# Axe 갹체에 plot함수로 그래프 생성
-axe1.plot(sr_one, marker='o', markersize=10, markerfacecolor='orange',
-          color='olive', linewidth=2, label='서울->경기')
-# 범례
-axe1.legend(loc='best')
-# y축 범위
-axe1.set_ylim(50000, 800000)
-# 타이틀 및 라벨 설정
-axe1.set_title('서울 -> 경기 인구 이동', size=20)
-axe1.set_xlabel('기간', size=12)
-axe1.set_ylabel('이동인구수', size=12)
-axe1.set_xticklabels(sr_one.index, rotation=75)
-axe1.tick_params(axis='x', labelsize=20)
-axe1.tick_params(axis='y', labelsize=10)
+# 앞에서 적용한 연도 사이에 이동한 인구수를 각 도별로 합산하여 새로운 열 추가
+df4['합계'] = df4.sum(axis=1)
+# 새롭게 생성한 '합계' 열을 오름차순으로 정렬하여 변수에 저장
+df_total = df4[['합계']].sort_values(by='합계', ascending=True)
+plt.style.use('ggplot')
+# 수평방향의 막대그래프를 생성
+df_total.plot(kind='barh', color='cornflowerblue', width=0.5, figsize=(10,5))
+
+plt.title('서울 -> 타시도 인구 이동')
+plt.ylabel('전입지')
+plt.xlabel('이동 인구 수')
 
 plt.show()
+

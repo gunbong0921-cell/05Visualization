@@ -1,4 +1,8 @@
 # 라이브러리 임포트
+from cProfile import label
+from turtle import color
+
+from numpy import size
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -26,32 +30,31 @@ df_seoul = df[mask]
 df_seoul = df_seoul.drop(['전출지별'], axis=1)
 df_seoul.rename({'전입지별':'전입지'}, axis=1, inplace=True)
 df_seoul.set_index('전입지', inplace=True)
-print(df_seoul)
-sr_one = df_seoul.loc['경기도']
+# print(df_seoul)
+# sr_one = df_seoul.loc['경기도']
 # print(sr_one)
 # 데이터 전처리 완료
 
-# 그래프 스타일 지정하기 : ggplot과 같은 스타일은 URL참조
-# https://matplotlib.org/stable/gallery/style_sheets/style_sheets_reference.html
-plt.style.use('ggplot')
+# 기존 연도를 1970 -> 2010으로 수정
+col_years = list(map(str, range(2010, 2018)))
+# 각 4개의 도를 선택해서 데이터 추출 / 연도 지정 
+df4 = df_seoul.loc[['충청남도','경상북도', '강원도', '전라남도'], col_years]
 
-# 캔버스 크기 지정
-fig = plt.figure(figsize=(20, 5))
-# 2행 1열중 첫번째 Axe 객체 생성(즉 캔버스를 위/아래 방향으로 분할)
-axe1 = fig.add_subplot(2, 1, 1)
-# Axe 갹체에 plot함수로 그래프 생성
-axe1.plot(sr_one, marker='o', markersize=10, markerfacecolor='orange',
-          color='olive', linewidth=2, label='서울->경기')
-# 범례
-axe1.legend(loc='best')
-# y축 범위
-axe1.set_ylim(50000, 800000)
-# 타이틀 및 라벨 설정
-axe1.set_title('서울 -> 경기 인구 이동', size=20)
-axe1.set_xlabel('기간', size=12)
-axe1.set_ylabel('이동인구수', size=12)
-axe1.set_xticklabels(sr_one.index, rotation=75)
-axe1.tick_params(axis='x', labelsize=20)
-axe1.tick_params(axis='y', labelsize=10)
+# 행과 열을 전치
+df4 = df4.transpose()
+# 스타일 설정
+plt.style.use('ggplot')
+# 데이터프레임의 인덱스를 정수형으로 변경
+df4.index = df4.index.map(int)
+# 막대그래프를 세로형(수직방향)으로 생성. 막대의 두께, 색깔 설정.
+df4.plot(kind='bar', figsize=(20,10), width=0.7,
+         color=['orange','green','skyblue','blue'])
+
+# 타이틀, 범례 설정
+plt.title('서울 -> 타시도 인구 이동', size=30)
+plt.ylabel('이동 인구 수', size=20)
+plt.xlabel('기간', size=20)
+plt.ylim(5000, 30000)
+plt.legend(loc='best', fontsize=15)
 
 plt.show()
