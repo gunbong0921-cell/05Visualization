@@ -1,7 +1,4 @@
 # 라이브러리 임포트
-from turtle import color
-
-from numpy import size
 import pandas as pd
 import matplotlib.pyplot as plt
 
